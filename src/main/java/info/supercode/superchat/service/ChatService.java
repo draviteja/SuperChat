@@ -35,6 +35,7 @@ public class ChatService {
                         new QuestionAnswerAdvisor(vectorStore, SearchRequest.builder().build()),
                         new SimpleLoggerAdvisor()
                 )
+                .defaultFunctions("currentWeather", "paymentStatus", "createAzureApp")
                 .build();
     }
 
