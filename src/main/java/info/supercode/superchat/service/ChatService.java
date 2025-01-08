@@ -60,7 +60,12 @@ public class ChatService {
                 .user(conversationMessage.getContent())
                 .advisors(a -> a.param(CHAT_MEMORY_CONVERSATION_ID_KEY, conversationId))
                 .call()
-                .content();
+                .content(); // short for chatResponse().getResult().getOutput().getContent();
+
+//        chatClient.prompt()
+//                .user(u -> u.text("Explain what do you see on this picture?").media(MimeTypeUtils.IMAGE_PNG, new ClassPathResource("/multimodal.test.png")))
+//                .call()
+//                .content();
 
         ConversationMessage assistantConversationMessage = new ConversationMessage();
         assistantConversationMessage.setContent(content);
