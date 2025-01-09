@@ -9,4 +9,6 @@ public interface OpenAIService {
     byte[] getSpeech(Question question);
 
     String getText(String message, Resource resource);
+
+    String uploadDoc(Resource resource);
 }

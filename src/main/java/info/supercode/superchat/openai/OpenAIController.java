@@ -31,11 +31,19 @@ public class OpenAIController {
     }
 
     @PostMapping("/image-upload")
-    public String uploadFile(
+    public String uploadImage(
             @RequestParam("file") MultipartFile file,
             @RequestParam("message") String message) throws IOException {
         Resource resource = new InputStreamResource(file.getInputStream());
         return openAIService.getText(message, resource);
     }
+
+    @PostMapping("/doc-upload")
+    public String uploadDoc(@RequestParam("file") MultipartFile file) throws IOException {
+        Resource resource = new InputStreamResource(file.getInputStream());
+        return openAIService.uploadDoc(resource);
+    }
+
+
 
 }

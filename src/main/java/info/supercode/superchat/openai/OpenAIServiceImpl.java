@@ -5,6 +5,7 @@ import org.springframework.ai.chat.messages.Message;
 import org.springframework.ai.chat.messages.UserMessage;
 import org.springframework.ai.chat.model.ChatModel;
 import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.document.Document;
 import org.springframework.ai.image.ImageModel;
 import org.springframework.ai.image.ImagePrompt;
 import org.springframework.ai.model.Media;
@@ -15,10 +16,19 @@ import org.springframework.ai.openai.api.OpenAiAudioApi;
 import org.springframework.ai.openai.audio.speech.SpeechModel;
 import org.springframework.ai.openai.audio.speech.SpeechPrompt;
 import org.springframework.ai.openai.audio.speech.SpeechResponse;
+import org.springframework.ai.reader.ExtractedTextFormatter;
+import org.springframework.ai.reader.TextReader;
+import org.springframework.ai.reader.pdf.PagePdfDocumentReader;
+import org.springframework.ai.reader.pdf.config.PdfDocumentReaderConfig;
+import org.springframework.ai.transformer.splitter.TextSplitter;
+import org.springframework.ai.transformer.splitter.TokenTextSplitter;
+import org.springframework.ai.vectorstore.VectorStore;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.MimeTypeUtils;
 
+import javax.print.Doc;
+import javax.swing.event.DocumentEvent;
 import java.util.Base64;
 import java.util.List;
 import java.util.function.Consumer;
@@ -29,11 +39,13 @@ public class OpenAIServiceImpl implements OpenAIService {
     private final ImageModel imageModel;
     private final SpeechModel speechModel;
     private final ChatModel chatModel;
+    private final VectorStore vectorStore;
 
-    public OpenAIServiceImpl(ImageModel imageModel, OpenAiAudioSpeechModel speechModel, ChatModel chatModel) {
+    public OpenAIServiceImpl(ImageModel imageModel, OpenAiAudioSpeechModel speechModel, ChatModel chatModel, VectorStore vectorStore) {
         this.imageModel = imageModel;
         this.speechModel = speechModel;
         this.chatModel = chatModel;
+        this.vectorStore = vectorStore;
     }
 
     @Override
@@ -80,5 +92,32 @@ public class OpenAIServiceImpl implements OpenAIService {
                 List.of(new Media(MimeTypeUtils.IMAGE_PNG, resource))); // image content
 
         return chatModel.call(new Prompt(userMessage)).getResult().getOutput().getContent();
+    }
+
+    @Override
+    public String uploadDoc(Resource resource) {
+//        if((resource.getFilename().toLowerCase()).endsWith(".pdf")) {
+//            PagePdfDocumentReader pdfReader = new PagePdfDocumentReader(resource, PdfDocumentReaderConfig.builder()
+//                    .withPageTopMargin(0)
+//                    .withPageExtractedTextFormatter(ExtractedTextFormatter.builder()
+//                            .withNumberOfTopTextLinesToDelete(0)
+//                            .build())
+//                    .withPagesPerDocument(1)
+//                    .build());
+//            List<Document> documents =  pdfReader.read();
+//            TextSplitter textSplitter = new TokenTextSplitter();
+//            List<Document> splitDocuments = textSplitter.apply(documents);
+//            vectorStore.add(splitDocuments);
+//        } else if((resource.getFilename().toLowerCase()).endsWith(".txt")) {
+//
+//
+//        }
+
+        TextReader textReader = new TextReader(resource);
+        List<Document> documents = textReader.read();
+        TextSplitter textSplitter = new TokenTextSplitter();
+        List<Document> splitDocuments = textSplitter.apply(documents);
+        vectorStore.add(splitDocuments);
+        return "";
     }
 }
